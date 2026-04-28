@@ -493,8 +493,9 @@
             chat.appendChild(div);
             
             // Auto-scroll to show latest message
-            const mainEl = document.querySelector('main');
-            mainEl.scrollTop = mainEl.scrollHeight;
+            requestAnimationFrame(() => {
+                chat.scrollIntoView({ behavior: 'smooth', block: 'end' });
+            });
             
             // Save to localStorage
             if (save) {
@@ -517,8 +518,7 @@
             }
             // Scroll to bottom after loading
             setTimeout(() => {
-                const mainEl = document.querySelector('main');
-                mainEl.scrollTop = mainEl.scrollHeight;
+                chat.scrollIntoView({ behavior: 'instant', block: 'end' });
             }, 100);
         }
         
