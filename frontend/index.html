@@ -96,15 +96,7 @@
     <!-- Chat Container -->
     <main class="flex-1 overflow-y-auto p-4">
         <div id="chat" class="max-w-2xl mx-auto space-y-4">
-            <!-- Welcome message -->
-            <div class="message-bubble flex gap-3">
-                <div class="w-8 h-8 rounded-full overflow-hidden bg-gradient-to-br from-teal-400 to-teal-600 flex items-center justify-center flex-shrink-0">
-                    <span>🔷</span>
-                </div>
-                <div class="bg-gray-800/50 rounded-2xl rounded-tl-sm px-4 py-3 max-w-[80%]">
-                    <p class="text-sm">Hello! I'm Vera. Tap the microphone to start talking — I'll respond in real-time.</p>
-                </div>
-            </div>
+            <!-- Messages loaded dynamically -->
         </div>
     </main>
 
@@ -197,6 +189,11 @@
                     case 'speech_started':
                         // User started speaking (detected by server VAD)
                         console.log('Speech detected');
+                        // Stop Vera if she's speaking (interrupt)
+                        if (isSpeaking) {
+                            stopVeraAudio();
+                            ws.send(JSON.stringify({ type: 'interrupt' }));
+                        }
                         break;
                         
                     case 'speech_stopped':
@@ -303,6 +300,19 @@
                 instruction.textContent = 'Please allow microphone access';
                 return false;
             }
+        }
+        
+        // Stop Vera's audio playback (for interrupts)
+        function stopVeraAudio() {
+            if (playbackContext) {
+                playbackContext.close();
+                playbackContext = null;
+                nextPlayTime = 0;
+            }
+            isSpeaking = false;
+            micContainer.classList.remove('speaking');
+            // Reinitialize playback context for next response
+            playbackContext = new AudioContext({ sampleRate: 24000 });
         }
         
         // Play audio chunk from OpenAI
@@ -443,7 +453,12 @@
         // Load chat history on page load
         function loadChatHistory() {
             const history = JSON.parse(localStorage.getItem('vera_chat_history') || '[]');
-            history.forEach(msg => addMessage(msg.text, msg.isUser, false));
+            if (history.length === 0) {
+                // Show welcome message if no history
+                addMessage("Hello! I'm Vera. Tap the microphone to start talking — I'll respond in real-time.", false, false);
+            } else {
+                history.forEach(msg => addMessage(msg.text, msg.isUser, false));
+            }
         }
         
         // Clear chat history
