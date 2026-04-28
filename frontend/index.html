@@ -200,6 +200,13 @@
                         // User stopped speaking
                         console.log('Speech ended');
                         break;
+                    
+                    case 'user_transcript':
+                        // User's transcribed speech
+                        if (data.text && data.text.trim()) {
+                            addMessage(data.text, true);
+                        }
+                        break;
                         
                     case 'response_done':
                         // Vera finished speaking

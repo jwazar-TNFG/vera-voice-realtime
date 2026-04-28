@@ -160,6 +160,13 @@ async def websocket_endpoint(client_ws: WebSocket):
                             "type": "speech_stopped"
                         }))
                     
+                    elif event_type == "conversation.item.input_audio_transcription.completed":
+                        # User's speech transcription
+                        await client_ws.send_text(json.dumps({
+                            "type": "user_transcript",
+                            "text": event.get("transcript", "")
+                        }))
+                    
                     elif event_type == "response.audio.done":
                         # Vera finished speaking
                         await client_ws.send_text(json.dumps({
