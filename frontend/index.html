@@ -99,6 +99,10 @@
                             <span>🎤 Hey Vera</span>
                             <span id="wake-status" class="text-xs text-gray-500">Off</span>
                         </button>
+                        <button id="text-toggle" class="w-full text-left px-4 py-2 text-sm text-gray-300 hover:bg-gray-700 transition-colors flex items-center justify-between">
+                            <span>⌨️ Text Input</span>
+                            <span id="text-status" class="text-xs text-gray-500">Off</span>
+                        </button>
                         <button id="clear-btn" class="w-full text-left px-4 py-2 text-sm text-gray-300 hover:bg-gray-700 transition-colors">
                             🗑️ Clear History
                         </button>
@@ -125,8 +129,8 @@
     <!-- Input Controls -->
     <footer class="p-4 border-t border-gray-800 sticky bottom-0 bg-gradient-to-t from-[#0a0a0a] to-[#0a0a0a]/95 backdrop-blur-sm">
         <div class="max-w-2xl mx-auto">
-            <!-- Text Input Row -->
-            <div class="flex items-center gap-3 mb-3">
+            <!-- Text Input Row (hidden by default) -->
+            <div id="text-input-row" class="hidden flex items-center gap-3 mb-3">
                 <input 
                     type="text" 
                     id="text-input" 
@@ -487,7 +491,10 @@
             div.appendChild(avatar);
             div.appendChild(bubble);
             chat.appendChild(div);
-            chat.scrollTop = chat.scrollHeight;
+            
+            // Auto-scroll to show latest message
+            const mainEl = document.querySelector('main');
+            mainEl.scrollTop = mainEl.scrollHeight;
             
             // Save to localStorage
             if (save) {
@@ -508,6 +515,11 @@
             } else {
                 history.forEach(msg => addMessage(msg.text, msg.isUser, false));
             }
+            // Scroll to bottom after loading
+            setTimeout(() => {
+                const mainEl = document.querySelector('main');
+                mainEl.scrollTop = mainEl.scrollHeight;
+            }, 100);
         }
         
         // Clear chat history
@@ -638,11 +650,34 @@
             setStatus('Processing...', 'teal');
         }
         
+        let textInputEnabled = false;
+        
+        function toggleTextInput() {
+            textInputEnabled = !textInputEnabled;
+            const textStatus = document.getElementById('text-status');
+            const textInputRow = document.getElementById('text-input-row');
+            
+            if (textInputEnabled) {
+                textStatus.textContent = 'On';
+                textStatus.classList.remove('text-gray-500');
+                textStatus.classList.add('text-teal-400');
+                textInputRow.classList.remove('hidden');
+                textInputRow.classList.add('flex');
+            } else {
+                textStatus.textContent = 'Off';
+                textStatus.classList.remove('text-teal-400');
+                textStatus.classList.add('text-gray-500');
+                textInputRow.classList.add('hidden');
+                textInputRow.classList.remove('flex');
+            }
+        }
+        
         // ========== END TEXT INPUT ==========
         
         // Event listeners
         micBtn.addEventListener('click', toggleListening);
         wakeToggle.addEventListener('click', toggleWakeWord);
+        document.getElementById('text-toggle').addEventListener('click', toggleTextInput);
         
         // Text input events
         sendBtn.addEventListener('click', sendTextMessage);
