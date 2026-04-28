@@ -133,6 +133,10 @@ async def websocket_endpoint(client_ws: WebSocket):
                     event = json.loads(message)
                     event_type = event.get("type")
                     
+                    # Log all events for debugging
+                    if event_type not in ["response.audio.delta", "response.audio_transcript.delta"]:
+                        print(f"OpenAI event: {event_type}")
+                    
                     # Forward relevant events to client
                     if event_type == "response.audio.delta":
                         # Audio chunk from OpenAI
@@ -162,9 +166,11 @@ async def websocket_endpoint(client_ws: WebSocket):
                     
                     elif event_type == "conversation.item.input_audio_transcription.completed":
                         # User's speech transcription
+                        transcript_text = event.get("transcript", "")
+                        print(f"User said: {transcript_text}")
                         await client_ws.send_text(json.dumps({
                             "type": "user_transcript",
-                            "text": event.get("transcript", "")
+                            "text": transcript_text
                         }))
                     
                     elif event_type == "response.audio.done":
