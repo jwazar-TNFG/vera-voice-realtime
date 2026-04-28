@@ -14,7 +14,7 @@ from dotenv import load_dotenv
 
 load_dotenv()
 
-OPENAI_API_KEY = os.getenv("OPENAI_API_KEY", "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")
+OPENAI_API_KEY = os.getenv("OPENAI_API_KEY")
 OPENAI_REALTIME_URL = "wss://api.openai.com/v1/realtime?model=gpt-4o-realtime-preview-2024-12-17"
 
 app = FastAPI(title="Vera Voice Realtime API")
