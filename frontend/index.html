@@ -80,6 +80,9 @@
                 </div>
             </div>
             <div class="flex items-center gap-2">
+                <button id="clear-btn" class="text-xs px-2 py-1 rounded-full bg-gray-700/50 text-gray-400 hover:bg-gray-600/50 transition-colors" title="Clear chat history">
+                    🗑️
+                </button>
                 <div id="latency" class="text-xs px-2 py-1 rounded-full bg-gray-700/50 text-gray-400 hidden">
                     --ms
                 </div>
@@ -410,7 +413,7 @@
             }
         }
         
-        function addMessage(text, isUser = false) {
+        function addMessage(text, isUser = false, save = true) {
             const div = document.createElement('div');
             div.className = 'message-bubble flex gap-3' + (isUser ? ' flex-row-reverse' : '');
             
@@ -426,10 +429,34 @@
             div.appendChild(bubble);
             chat.appendChild(div);
             chat.scrollTop = chat.scrollHeight;
+            
+            // Save to localStorage
+            if (save) {
+                const history = JSON.parse(localStorage.getItem('vera_chat_history') || '[]');
+                history.push({ text, isUser, timestamp: Date.now() });
+                // Keep last 50 messages
+                if (history.length > 50) history.shift();
+                localStorage.setItem('vera_chat_history', JSON.stringify(history));
+            }
+        }
+        
+        // Load chat history on page load
+        function loadChatHistory() {
+            const history = JSON.parse(localStorage.getItem('vera_chat_history') || '[]');
+            history.forEach(msg => addMessage(msg.text, msg.isUser, false));
+        }
+        
+        // Clear chat history
+        function clearHistory() {
+            localStorage.removeItem('vera_chat_history');
+            chat.innerHTML = '';
+            // Re-add welcome message
+            addMessage("Hello! I'm Vera. Tap the microphone to start talking — I'll respond in real-time.", false, false);
         }
         
         // Event listeners
         micBtn.addEventListener('click', toggleListening);
+        document.getElementById('clear-btn').addEventListener('click', clearHistory);
         
         // Keyboard shortcut (spacebar)
         document.addEventListener('keydown', (e) => {
@@ -440,6 +467,7 @@
         });
         
         // Initialize
+        loadChatHistory();
         connect();
     </script>
 </body>
