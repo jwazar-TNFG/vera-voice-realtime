@@ -492,8 +492,10 @@
             div.appendChild(bubble);
             chat.appendChild(div);
             
-            // Auto-scroll to show latest message
-            div.scrollIntoView({ behavior: 'instant', block: 'end' });
+            // Auto-scroll to show latest message (use setTimeout for DOM to render)
+            setTimeout(() => {
+                div.scrollIntoView({ behavior: 'instant', block: 'end' });
+            }, 50);
             
             // Save to localStorage
             if (save) {
