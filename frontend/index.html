@@ -83,10 +83,6 @@
                 </div>
             </div>
             <div class="flex items-center gap-2">
-                <!-- Wake Word Toggle -->
-                <button id="wake-toggle" class="text-xs px-3 py-1 rounded-full bg-gray-700/50 text-gray-400 hover:bg-gray-600/50 transition-colors" title="Toggle Hey Vera wake word">
-                    🎤 Hey Vera
-                </button>
                 <div id="latency" class="text-xs px-2 py-1 rounded-full bg-gray-700/50 text-gray-400 hidden">
                     --ms
                 </div>
@@ -98,7 +94,11 @@
                     <button id="settings-btn" class="text-xs px-2 py-1 rounded-full bg-gray-700/50 text-gray-400 hover:bg-gray-600/50 transition-colors" title="Settings">
                         ⚙️
                     </button>
-                    <div id="settings-menu" class="hidden absolute right-0 top-8 bg-gray-800 border border-gray-700 rounded-lg shadow-lg py-1 min-w-[150px] z-50">
+                    <div id="settings-menu" class="hidden absolute right-0 top-8 bg-gray-800 border border-gray-700 rounded-lg shadow-lg py-1 min-w-[180px] z-50">
+                        <button id="wake-toggle" class="w-full text-left px-4 py-2 text-sm text-gray-300 hover:bg-gray-700 transition-colors flex items-center justify-between">
+                            <span>🎤 Hey Vera</span>
+                            <span id="wake-status" class="text-xs text-gray-500">Off</span>
+                        </button>
                         <button id="clear-btn" class="w-full text-left px-4 py-2 text-sm text-gray-300 hover:bg-gray-700 transition-colors">
                             🗑️ Clear History
                         </button>
@@ -595,20 +595,21 @@
         
         async function toggleWakeWord() {
             wakeWordEnabled = !wakeWordEnabled;
+            const wakeStatus = document.getElementById('wake-status');
             
             if (wakeWordEnabled) {
-                wakeToggle.classList.remove('bg-gray-700/50', 'text-gray-400');
-                wakeToggle.classList.add('bg-teal-500/30', 'text-teal-400');
-                wakeToggle.innerHTML = '🎤 Listening...';
+                wakeStatus.textContent = 'On';
+                wakeStatus.classList.remove('text-gray-500');
+                wakeStatus.classList.add('text-teal-400');
                 await startWakeWordListening();
             } else {
-                wakeToggle.classList.remove('bg-teal-500/30', 'text-teal-400');
-                wakeToggle.classList.add('bg-gray-700/50', 'text-gray-400');
-                wakeToggle.innerHTML = '🎤 Hey Vera';
+                wakeStatus.textContent = 'Off';
+                wakeStatus.classList.remove('text-teal-400');
+                wakeStatus.classList.add('text-gray-500');
                 await stopWakeWordListening();
                 if (!isListening) {
                     setStatus('Ready', 'green');
-                    instruction.textContent = 'Tap to start talking';
+                    instruction.textContent = 'Type or tap mic to speak';
                 }
             }
         }
