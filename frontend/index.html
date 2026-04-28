@@ -122,24 +122,46 @@
         </div>
     </div>
 
-    <!-- Voice Control -->
-    <footer class="p-6 border-t border-gray-800 sticky bottom-0 bg-gradient-to-t from-[#0a0a0a] to-[#0a0a0a]/95 backdrop-blur-sm">
-        <div class="max-w-2xl mx-auto flex flex-col items-center">
-            <div id="mic-container" class="relative">
-                <div class="pulse-ring absolute inset-0 rounded-full bg-gray-500/30"></div>
-                <button 
-                    id="mic-btn"
-                    class="mic-btn relative w-20 h-20 rounded-full bg-gradient-to-br from-gray-600 to-gray-700 flex items-center justify-center shadow-lg transition-all active:scale-95 disabled:opacity-50"
-                    disabled
+    <!-- Input Controls -->
+    <footer class="p-4 border-t border-gray-800 sticky bottom-0 bg-gradient-to-t from-[#0a0a0a] to-[#0a0a0a]/95 backdrop-blur-sm">
+        <div class="max-w-2xl mx-auto">
+            <!-- Text Input Row -->
+            <div class="flex items-center gap-3 mb-3">
+                <input 
+                    type="text" 
+                    id="text-input" 
+                    placeholder="Type a message..." 
+                    class="flex-1 bg-gray-800/50 border border-gray-700 rounded-full px-4 py-3 text-sm text-white placeholder-gray-500 focus:outline-none focus:border-teal-500 transition-colors"
                 >
-                    <svg id="mic-icon" class="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 11a7 7 0 01-7 7m0 0a7 7 0 01-7-7m7 7v4m0 0H8m4 0h4m-4-8a3 3 0 01-3-3V5a3 3 0 116 0v6a3 3 0 01-3 3z"/>
+                <button 
+                    id="send-btn"
+                    class="w-12 h-12 rounded-full bg-teal-500 hover:bg-teal-600 flex items-center justify-center transition-colors disabled:opacity-50"
+                    title="Send message"
+                >
+                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 19l9 2-9-18-9 18 9-2zm0 0v-8"/>
                     </svg>
                 </button>
             </div>
-            <p id="instruction" class="text-gray-500 text-sm mt-4">
-                Connecting to server...
-            </p>
+            
+            <!-- Voice Control Row -->
+            <div class="flex flex-col items-center">
+                <div id="mic-container" class="relative">
+                    <div class="pulse-ring absolute inset-0 rounded-full bg-gray-500/30"></div>
+                    <button 
+                        id="mic-btn"
+                        class="mic-btn relative w-16 h-16 rounded-full bg-gradient-to-br from-gray-600 to-gray-700 flex items-center justify-center shadow-lg transition-all active:scale-95 disabled:opacity-50"
+                        disabled
+                    >
+                        <svg id="mic-icon" class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 11a7 7 0 01-7 7m0 0a7 7 0 01-7-7m7 7v4m0 0H8m4 0h4m-4-8a3 3 0 01-3-3V5a3 3 0 116 0v6a3 3 0 01-3 3z"/>
+                        </svg>
+                    </button>
+                </div>
+                <p id="instruction" class="text-gray-500 text-xs mt-2">
+                    Connecting to server...
+                </p>
+            </div>
         </div>
     </footer>
 
@@ -161,6 +183,8 @@
         const transcriptEl = document.getElementById('transcript');
         const latencyEl = document.getElementById('latency');
         const wakeToggle = document.getElementById('wake-toggle');
+        const textInput = document.getElementById('text-input');
+        const sendBtn = document.getElementById('send-btn');
         
         // State
         let ws = null;
@@ -591,9 +615,42 @@
         
         // ========== END WAKE WORD ==========
         
+        // ========== TEXT INPUT ==========
+        
+        function sendTextMessage() {
+            const text = textInput.value.trim();
+            if (!text || !ws || ws.readyState !== WebSocket.OPEN) return;
+            
+            // Add user message to chat
+            addMessage(text, true);
+            
+            // Send to server
+            ws.send(JSON.stringify({
+                type: 'text',
+                text: text
+            }));
+            
+            // Clear input
+            textInput.value = '';
+            
+            // Update status
+            setStatus('Processing...', 'teal');
+        }
+        
+        // ========== END TEXT INPUT ==========
+        
         // Event listeners
         micBtn.addEventListener('click', toggleListening);
         wakeToggle.addEventListener('click', toggleWakeWord);
+        
+        // Text input events
+        sendBtn.addEventListener('click', sendTextMessage);
+        textInput.addEventListener('keypress', (e) => {
+            if (e.key === 'Enter') {
+                e.preventDefault();
+                sendTextMessage();
+            }
+        });
         
         // Settings menu toggle
         const settingsBtn = document.getElementById('settings-btn');

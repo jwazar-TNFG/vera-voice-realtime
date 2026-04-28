@@ -120,6 +120,28 @@ async def websocket_endpoint(client_ws: WebSocket):
                     elif message.get("type") == "interrupt":
                         # User interrupted - cancel current response
                         await openai_ws.send(json.dumps({"type": "response.cancel"}))
+                    
+                    elif message.get("type") == "text":
+                        # Text message from user
+                        text = message.get("text", "")
+                        print(f"User text: {text}")
+                        
+                        # Send text as conversation item
+                        conversation_item = {
+                            "type": "conversation.item.create",
+                            "item": {
+                                "type": "message",
+                                "role": "user",
+                                "content": [{
+                                    "type": "input_text",
+                                    "text": text
+                                }]
+                            }
+                        }
+                        await openai_ws.send(json.dumps(conversation_item))
+                        
+                        # Trigger response
+                        await openai_ws.send(json.dumps({"type": "response.create"}))
                         
             except WebSocketDisconnect:
                 print("Client disconnected")
