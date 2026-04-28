@@ -79,7 +79,7 @@ async def websocket_endpoint(client_ws: WebSocket):
             "session": {
                 "modalities": ["text", "audio"],
                 "instructions": VERA_SYSTEM_PROMPT,
-                "voice": "alloy",  # Options: alloy, echo, fable, onyx, nova, shimmer
+                "voice": "shimmer",  # Options: alloy, echo, fable, onyx, nova, shimmer
                 "input_audio_format": "pcm16",
                 "output_audio_format": "pcm16",
                 "input_audio_transcription": {
