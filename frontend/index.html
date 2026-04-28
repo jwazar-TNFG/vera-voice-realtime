@@ -5,6 +5,9 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Vera Voice Realtime</title>
     <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Picovoice Porcupine Web SDK v4 -->
+    <script src="https://unpkg.com/@picovoice/porcupine-web@4.0.0/dist/iife/index.js"></script>
+    <script src="https://unpkg.com/@picovoice/web-voice-processor@4.0.8/dist/iife/index.js"></script>
     <style>
         body {
             background: linear-gradient(135deg, #0a0a0a 0%, #1a1a2e 100%);
@@ -80,6 +83,10 @@
                 </div>
             </div>
             <div class="flex items-center gap-2">
+                <!-- Wake Word Toggle -->
+                <button id="wake-toggle" class="text-xs px-3 py-1 rounded-full bg-gray-700/50 text-gray-400 hover:bg-gray-600/50 transition-colors" title="Toggle Hey Vera wake word">
+                    🎤 Hey Vera
+                </button>
                 <div id="latency" class="text-xs px-2 py-1 rounded-full bg-gray-700/50 text-gray-400 hidden">
                     --ms
                 </div>
@@ -140,6 +147,10 @@
         // Configuration
         const WS_URL = 'wss://vera-voice-realtime-production.up.railway.app/ws';
         
+        // Picovoice Configuration
+        const PICOVOICE_ACCESS_KEY = 'Re/OEQlPq+daveRhjG4anO/l+jzXDCfhoAKgY7Bb007DV/80FW84Hw==';
+        const HEY_VERA_KEYWORD_BASE64 = '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';
+        
         // DOM Elements
         const micBtn = document.getElementById('mic-btn');
         const micContainer = document.getElementById('mic-container');
@@ -149,6 +160,7 @@
         const transcriptContainer = document.getElementById('transcript-container');
         const transcriptEl = document.getElementById('transcript');
         const latencyEl = document.getElementById('latency');
+        const wakeToggle = document.getElementById('wake-toggle');
         
         // State
         let ws = null;
@@ -160,6 +172,11 @@
         let currentTranscript = '';
         let audioQueue = [];
         let isPlayingAudio = false;
+        
+        // Wake word state
+        let wakeWordEnabled = false;
+        let porcupine = null;
+        let webVoiceProcessor = null;
         
         // Audio playback
         let playbackContext = null;
@@ -477,8 +494,106 @@
             addMessage("Hello! I'm Vera. Tap the microphone to start talking — I'll respond in real-time.", false, false);
         }
         
+        // ========== WAKE WORD DETECTION ==========
+        
+        // Initialize Porcupine wake word detector
+        async function initPorcupine() {
+            try {
+                console.log('Initializing Porcupine...');
+                
+                porcupine = await PorcupineWeb.PorcupineWorker.create(
+                    PICOVOICE_ACCESS_KEY,
+                    [{
+                        base64: HEY_VERA_KEYWORD_BASE64,
+                        label: 'Hey Vera'
+                    }],
+                    keywordDetectionCallback,
+                    {
+                        publicPath: './porcupine_params.pv',
+                        forceWrite: true
+                    }
+                );
+                
+                console.log('Porcupine initialized successfully');
+                return true;
+            } catch (e) {
+                console.error('Failed to initialize Porcupine:', e);
+                return false;
+            }
+        }
+        
+        // Callback when wake word is detected
+        function keywordDetectionCallback(detection) {
+            if (detection.index >= 0) {
+                console.log('Wake word detected: Hey Vera!');
+                
+                if (!isListening && !isSpeaking) {
+                    // Haptic feedback
+                    if (navigator.vibrate) navigator.vibrate([100, 50, 100]);
+                    
+                    // Start listening
+                    toggleListening();
+                }
+            }
+        }
+        
+        async function startWakeWordListening() {
+            if (!porcupine) {
+                const success = await initPorcupine();
+                if (!success) {
+                    console.error('Could not initialize wake word detection');
+                    setStatus('Wake Error', 'red');
+                    return;
+                }
+            }
+            
+            try {
+                webVoiceProcessor = await WebVoiceProcessor.WebVoiceProcessor.subscribe(porcupine);
+                console.log('Wake word listening started');
+                setStatus('Say "Hey Vera"', 'teal');
+                instruction.textContent = 'Say "Hey Vera" to start...';
+            } catch (e) {
+                console.error('Failed to start wake word listening:', e);
+                setStatus('Mic Error', 'red');
+            }
+        }
+        
+        async function stopWakeWordListening() {
+            if (webVoiceProcessor && porcupine) {
+                try {
+                    await WebVoiceProcessor.WebVoiceProcessor.unsubscribe(porcupine);
+                    webVoiceProcessor = null;
+                } catch (e) {
+                    console.error('Error stopping wake word listener:', e);
+                }
+            }
+        }
+        
+        async function toggleWakeWord() {
+            wakeWordEnabled = !wakeWordEnabled;
+            
+            if (wakeWordEnabled) {
+                wakeToggle.classList.remove('bg-gray-700/50', 'text-gray-400');
+                wakeToggle.classList.add('bg-teal-500/30', 'text-teal-400');
+                wakeToggle.innerHTML = '🎤 Listening...';
+                await startWakeWordListening();
+            } else {
+                wakeToggle.classList.remove('bg-teal-500/30', 'text-teal-400');
+                wakeToggle.classList.add('bg-gray-700/50', 'text-gray-400');
+                wakeToggle.innerHTML = '🎤 Hey Vera';
+                await stopWakeWordListening();
+                if (!isListening) {
+                    setStatus('Ready', 'green');
+                    instruction.textContent = 'Tap to start talking';
+                }
+            }
+        }
+        
+        // ========== END WAKE WORD ==========
+        
         // Event listeners
         micBtn.addEventListener('click', toggleListening);
+        wakeToggle.addEventListener('click', toggleWakeWord);
         
         // Settings menu toggle
         const settingsBtn = document.getElementById('settings-btn');
