@@ -505,12 +505,11 @@
             }
         }
         
-        // Scroll chat container to bottom
+        // Scroll to bottom of page (window scrolls, not container)
         function scrollToBottom() {
-            const chatContainer = document.getElementById('chat-container');
             // Use requestAnimationFrame to ensure DOM has updated
             requestAnimationFrame(() => {
-                chatContainer.scrollTop = chatContainer.scrollHeight;
+                window.scrollTo(0, document.body.scrollHeight);
             });
         }
         
